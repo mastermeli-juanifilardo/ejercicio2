@@ -1,5 +1,7 @@
 package classes;
 
+import classes.Exceptions.CriterionDoesNotExistException;
+import classes.Exceptions.MissingParamsException;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -7,6 +9,7 @@ import com.google.gson.JsonObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
@@ -31,46 +34,53 @@ public class Main {
 
             try {
 
-            String site = request.queryParams("site");
-            String payment_method = request.queryParams("payment_method");
-            String agency_id = request.queryParams("agency_id");
+                String site = request.queryParams("site");
+                String payment_method = request.queryParams("payment_method");
+                String agency_id = request.queryParams("agency_id");
 
-            if (site == null || payment_method == null) {
-                throw new MissingParamsException("Faltan parámetros obligatorios.");
-            }
-
-            String resource = "/sites/" + site + "/payment_methods/" + payment_method + "/agencies/";
-
-
-            if (agency_id == null) {
-                String limit = request.queryParams("limit");
-                String offset = request.queryParams("offset");
-                String sort_by = request.queryParams("sort_by");
-                String order = request.queryParams("order");
-
-                boolean isFirst = true; // Para ver cuál entró primero, a ese le corresponde un signo de pregunta
-
-                if (limit != null) {
-                    resource += ( isFirst ? "?" : "&" ) + "limit=" + limit;
-                    isFirst = false;
+                if (site == null || payment_method == null) {
+                    throw new MissingParamsException("Faltan parámetros obligatorios.");
                 }
-                if (offset != null) {
-                    resource += ( isFirst ? "?" : "&" ) + "offset=" + offset;
-                    isFirst = false;
+
+                String resource = "/sites/" + site + "/payment_methods/" + payment_method + "/agencies/";
+
+                if (agency_id == null) {
+                    String limit = request.queryParams("limit");
+                    String offset = request.queryParams("offset");
+
+                    boolean isFirst = true; // Para ver cuál entró primero: a ese le corresponde "?" y no un "&"
+
+                    if (limit != null) {
+                        resource += ( isFirst ? "?" : "&" ) + "limit=" + limit;
+                        isFirst = false;
+                    }
+                    if (offset != null) {
+                        resource += ( isFirst ? "?" : "&" ) + "offset=" + offset;
+                        isFirst = false;
+                    }
+
+                } else {
+                    resource += agency_id;
                 }
-                //if (sort_by != null) {
-                //    resource += ( isFirst ? "?" : "&" ) + "sort_by=" + sort_by;
-                //    isFirst = false;
-                //}
 
-            } else {
-                resource += agency_id;
-            }
-
-            String full_url = api_url + resource;
+                String full_url = api_url + resource;
 
                 String json_string = readUrl(full_url);
                 Agency[] agencies = readAgencies(json_string);
+
+                /*
+                if (agency_id == null) {
+                    // Si hay más de una agencia, ordenar
+                    String sort_by = request.queryParams("sort_by");
+                    Agency.setCriterion(sort_by != null ? sort_by : "address_line");
+                    String order = request.queryParams("order");
+
+                    // Por defecto ordenar ascendentemente
+                    if (order == null || order != "desc") {
+                        Ordenador.sortArray(agencies);
+                    }
+                }
+                */
 
                 return new Gson().toJson(new StandardResponse(
                         ResponseStatus.SUCCESS,
@@ -81,6 +91,7 @@ public class Main {
                 e.printStackTrace();
                 String msg = e.getMessage();
                 System.out.println(msg);
+                logger.severe(msg);
 
                 return new Gson().toJson(new StandardResponse(
                         ResponseStatus.ERROR,
@@ -91,12 +102,23 @@ public class Main {
                 e.printStackTrace();
                 String msg = "Ocurrió un error al traer las agencias.";
                 System.out.println(msg);
+                logger.severe(msg);
 
                 return new Gson().toJson(new StandardResponse(
                         ResponseStatus.ERROR,
                         new Gson().toJson(msg)
                 ));
-            }
+            } /*catch (CriterionDoesNotExistException e) {
+                e.printStackTrace();
+                String msg = e.getMessage();
+                System.out.println(msg);
+                logger.severe(msg);
+
+                return new Gson().toJson(new StandardResponse(
+                        ResponseStatus.ERROR,
+                        new Gson().toJson(msg)
+                ));
+            }*/
         });
     }
 

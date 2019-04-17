@@ -1,4 +1,4 @@
-package classes;
+package classes.Exceptions;
 
 public class MissingParamsException extends Exception {
 

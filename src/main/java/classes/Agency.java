@@ -1,6 +1,11 @@
 package classes;
 
-public class Agency {
+import classes.Exceptions.CriterionDoesNotExistException;
+
+import static classes.Criteria.ADDRESS_LINE;
+
+public class Agency implements Comparable<Agency>{
+
     private String agency_code;
     private String correspondent_id;
     private String description;
@@ -12,6 +17,8 @@ public class Agency {
     private String site_id;
     private boolean terminal;
     private Address address;
+
+    public static Criteria criterion;
 
     public Agency() {
     }
@@ -102,5 +109,40 @@ public class Agency {
 
     public void setAddress(Address address) {
         this.address = address;
+    }
+
+
+    public static void setCriterion(String criterion) throws CriterionDoesNotExistException {
+
+        switch(criterion){
+            case "agency_code":
+                Agency.criterion = Criteria.AGENCY_CODE;
+                break;
+            case "address_line":
+                Agency.criterion = ADDRESS_LINE;
+                break;
+            case "distance":
+                Agency.criterion = Criteria.DISTANCE;
+                break;
+            default:
+                throw new CriterionDoesNotExistException("No existe el criterio " + criterion);
+        }
+    }
+
+    @Override
+    public int compareTo(Agency other) {
+        int flag = 999;
+
+        switch (criterion) {
+            case ADDRESS_LINE:
+                flag = this.address.getAddressLine().compareTo(other.address.getAddressLine());
+
+            case AGENCY_CODE:
+                flag = this.agency_code.compareTo(other.agency_code);
+
+            case DISTANCE:
+                flag = Double.compare(this.distance, other.distance);
+        }
+        return flag;
     }
 }

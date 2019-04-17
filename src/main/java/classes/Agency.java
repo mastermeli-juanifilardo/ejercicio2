@@ -2,8 +2,6 @@ package classes;
 
 import classes.Exceptions.CriterionDoesNotExistException;
 
-import static classes.Criteria.ADDRESS_LINE;
-
 public class Agency implements Comparable<Agency>{
 
     private String agency_code;
@@ -119,7 +117,7 @@ public class Agency implements Comparable<Agency>{
                 Agency.criterion = Criteria.AGENCY_CODE;
                 break;
             case "address_line":
-                Agency.criterion = ADDRESS_LINE;
+                Agency.criterion = Criteria.ADDRESS_LINE;
                 break;
             case "distance":
                 Agency.criterion = Criteria.DISTANCE;
@@ -133,15 +131,17 @@ public class Agency implements Comparable<Agency>{
     public int compareTo(Agency other) {
         int flag = 999;
 
-        switch (criterion) {
+        switch (Agency.criterion) {
             case ADDRESS_LINE:
                 flag = this.address.getAddressLine().compareTo(other.address.getAddressLine());
-
+                break;
             case AGENCY_CODE:
                 flag = this.agency_code.compareTo(other.agency_code);
+                break;
 
             case DISTANCE:
                 flag = Double.compare(this.distance, other.distance);
+                break;
         }
         return flag;
     }

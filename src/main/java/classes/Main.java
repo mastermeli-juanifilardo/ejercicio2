@@ -68,19 +68,24 @@ public class Main {
                 String json_string = readUrl(full_url);
                 Agency[] agencies = readAgencies(json_string);
 
-                /*
+
                 if (agency_id == null) {
                     // Si hay más de una agencia, ordenar
                     String sort_by = request.queryParams("sort_by");
-                    Agency.setCriterion(sort_by != null ? sort_by : "address_line");
-                    String order = request.queryParams("order");
 
-                    // Por defecto ordenar ascendentemente
-                    if (order == null || order != "desc") {
-                        Ordenador.sortArray(agencies);
+                    if (sort_by != null) {
+                        Agency.setCriterion(sort_by);
+                        String order = request.queryParams("order");
+
+                        // Por defecto ordenar ascendentemente
+                        if (order == null || order != "desc") {
+                            Ordenador.sortArray(agencies);
+                        } else {
+                            Ordenador.sortArray(agencies);
+                        }
                     }
                 }
-                */
+
 
                 return new Gson().toJson(new StandardResponse(
                         ResponseStatus.SUCCESS,
@@ -108,7 +113,7 @@ public class Main {
                         ResponseStatus.ERROR,
                         new Gson().toJson(msg)
                 ));
-            } /*catch (CriterionDoesNotExistException e) {
+            } catch (CriterionDoesNotExistException e) {
                 e.printStackTrace();
                 String msg = e.getMessage();
                 System.out.println(msg);
@@ -118,7 +123,7 @@ public class Main {
                         ResponseStatus.ERROR,
                         new Gson().toJson(msg)
                 ));
-            }*/
+            }
         });
     }
 
